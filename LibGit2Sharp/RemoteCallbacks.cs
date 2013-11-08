@@ -51,7 +51,7 @@ namespace LibGit2Sharp
 
         internal GitRemoteCallbacks GenerateCallbacks()
         {
-            var callbacks = new GitRemoteCallbacks {version = 1};
+            var callbacks = new GitRemoteCallbacks { version = 1 };
 
             if (Progress != null)
             {
@@ -146,7 +146,12 @@ namespace LibGit2Sharp
 
         private int GitCredentialHandler(out IntPtr cred, IntPtr url, IntPtr username_from_url, uint types, IntPtr payload)
         {
-            return NativeMethods.git_cred_userpass_plaintext_new(out cred, Credentials.Username, Credentials.Password);
+            if (Credentials is BasicCredentials)
+                return NativeMethods.git_cred_userpass_plaintext_new(out cred, ((BasicCredentials)Credentials).Username, ((BasicCredentials)Credentials).Password);
+            else if (Credentials is SshCredentials)
+                return NativeMethods.git_cred_ssh_key_new(out cred, ((SshCredentials)Credentials).Username, ((SshCredentials)Credentials).PublicKeyPath, ((SshCredentials)Credentials).PrivateKeyPath, ((SshCredentials)Credentials).Passphrase);
+            else
+                throw new ArgumentException(String.Format("The Credentials type '{0}' is not currently supported in RemoteCallbacks.", Credentials.GetType().Name));
         }
 
         #endregion
