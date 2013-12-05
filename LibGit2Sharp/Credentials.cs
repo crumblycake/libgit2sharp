@@ -1,12 +1,15 @@
-﻿namespace LibGit2Sharp
+﻿using System;
+namespace LibGit2Sharp
 {
     /// <summary>
     /// Class that holds credentials for remote repository access.
     /// </summary>
+    [Serializable]
     public abstract class Credentials
     {
     }
 
+    [Serializable]
     public class BasicCredentials : Credentials
     {
         /// <summary>
@@ -20,6 +23,7 @@
         public string Password { get; set; }
     }
 
+    [Serializable]
     public class SshCredentials : Credentials
     {
         public string Username { get; set; }

@@ -908,6 +908,77 @@ namespace LibGit2Sharp.Core
             }
         }
 
+        public static GitMergeResult git_merge(RepositorySafeHandle repo, GitMergeOpts opts, GitOid oid)
+        {
+            using (ThreadAffinity())
+            {
+                GitMergeHeadHandle their_heads;
+
+                int res1 = NativeMethods.git_merge_head_from_oid(out their_heads, repo, ref oid);
+                if (res1 == (int)GitErrorCode.NotFound)
+                    return null;
+
+                Ensure.ZeroResult(res1);
+
+                GitMergeResultHandle ret;
+                
+                int res2 = NativeMethods.git_merge(out ret, repo, ref their_heads, (UIntPtr)1, ref opts);
+
+                if (res2 == (int)GitErrorCode.NotFound)
+                {
+                    return null;
+                }
+
+                Ensure.ZeroResult(res2);
+
+                return new GitMergeResult(ret);
+            }
+        }
+
+        public static bool git_merge_result_is_uptodate(GitMergeResultHandle handle)
+        {
+            using (ThreadAffinity())
+            {
+                int res = NativeMethods.git_merge_result_is_uptodate(handle);
+                Ensure.ZeroResult(res);
+
+                return (res == 1);
+            }
+        }
+
+        public static bool git_merge_result_is_fastforward(GitMergeResultHandle handle)
+        {
+            using (ThreadAffinity())
+            {
+                int res = NativeMethods.git_merge_result_is_fastforward(handle);
+                Ensure.ZeroResult(res);
+
+                return (res == 1);
+            }
+        }
+
+        public static GitOid git_merge_result_fastforward_oid(GitMergeResultHandle handle)
+        {
+            using (ThreadAffinity())
+            {
+                GitOid oid;
+                int res = NativeMethods.git_merge_result_fastforward_oid(out oid, handle);
+                Ensure.ZeroResult(res);
+
+                return oid;
+            }
+        }
+
+        public static void git_merge_result_free(IntPtr handle)
+        {
+            NativeMethods.git_merge_result_free(handle);
+        }
+
+        public static void git_merge_head_free(IntPtr handle)
+        {
+            NativeMethods.git_merge_head_free(handle);
+        }
+
         #endregion
 
         #region git_message_
@@ -2379,9 +2450,14 @@ namespace LibGit2Sharp.Core
 
         #endregion
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate int git_test_cb<T>(
+            T path,
+            IntPtr path2);
+
         private static ICollection<TResult> git_foreach<T, TResult>(
             Func<T, TResult> resultSelector,
-            Func<Func<T, IntPtr, int>, int> iterator,
+            Func<git_test_cb<T>, int> iterator,
             params GitErrorCode[] ignoredErrorCodes)
         {
             using (ThreadAffinity())

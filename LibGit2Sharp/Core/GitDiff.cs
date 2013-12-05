@@ -160,6 +160,7 @@ namespace LibGit2Sharp.Core
         GIT_DIFF_MINIMAL = (1 << 29),
     }
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int diff_notify_cb(
         IntPtr diff_so_far,
         IntPtr delta_to_add,

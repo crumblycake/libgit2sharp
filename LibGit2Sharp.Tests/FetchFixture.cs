@@ -62,7 +62,7 @@ namespace LibGit2Sharp.Tests
                 Remote remote = repo.Network.Remotes.Add(remoteName, Constants.PrivateRepoUrl);
 
                 // Perform the actual fetch
-                repo.Network.Fetch(remote, credentials: new Credentials
+                repo.Network.Fetch(remote, credentials: new BasicCredentials
                                               {
                                                   Username = Constants.PrivateRepoUsername,
                                                   Password = Constants.PrivateRepoPassword
